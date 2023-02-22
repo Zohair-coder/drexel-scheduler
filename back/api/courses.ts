@@ -10,7 +10,7 @@ router.get("/", async (req, res) => {
 
 router.post("/generateSchedules", async (req, res) => {
   console.log(req.body);
-  let courses_input = req.body.courses;
+  let courses_input: string[] = req.body.courses;
   let num_courses = req.body.num_courses;
 
   if (!courses_input || courses_input.length === 0) {
@@ -34,12 +34,12 @@ router.post("/generateSchedules", async (req, res) => {
     courses.push(sections.rows);
   }
   console.log(courses);
-  let combinations = computeSectionCombinations(courses, num_courses);
+  let schedules = computeSchedules(courses, num_courses);
 
   let response: any[] = [];
-  for (let combination of combinations) {
+  for (let schedule of schedules) {
     response.push({
-      courses: combination,
+      schedule: schedule,
       hasTimeConflict: false, // TODO: Implement this
       isFull: false, // TODO: Implement this
     });
@@ -48,7 +48,7 @@ router.post("/generateSchedules", async (req, res) => {
   res.send(response);
 });
 
-function computeSectionCombinations(courses: any[][], n: number): any[][] {
+function computeSchedules(courses: any[][], n: number): any[][] {
   const combinations: any[][] = [];
 
   function backtrack(combo: any[][], i: number): void {
