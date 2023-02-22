@@ -65,6 +65,7 @@ router.post("/generateschedules", async (req, res) => {
       schedule,
       hasTimeConflict,
       hasFullSections,
+      avgScheduleRating: getAvereageScheduleRating(schedule),
     });
   }
 
@@ -156,6 +157,40 @@ async function add_instructors(section: any) {
   let crn = section.crn;
   let instructors = await db.getInstructors(crn);
   section.instructors = instructors;
+}
+
+function getAvereageScheduleRating(schedule: any[]) {
+  let total_avg_rating = 0;
+  let total_difficulty = 0;
+  let total_ratings = 0;
+  let num_ratings = 0;
+
+  for (let section of schedule) {
+    for (let instructor of section.instructors) {
+      if (
+        instructor.avg_rating &&
+        instructor.avg_difficulty &&
+        instructor.num_ratings
+      ) {
+        total_avg_rating += parseFloat(instructor.avg_rating);
+        total_difficulty += parseFloat(instructor.avg_difficulty);
+        total_ratings += parseInt(instructor.num_ratings);
+        num_ratings++;
+      }
+    }
+  }
+
+  if (num_ratings === 0) {
+    return;
+  }
+
+  let avg_schedule_rating: any = {};
+
+  avg_schedule_rating.avg_rating = total_avg_rating / num_ratings;
+  avg_schedule_rating.avg_difficulty = total_difficulty / num_ratings;
+  avg_schedule_rating.total_ratings = total_ratings;
+
+  return avg_schedule_rating;
 }
 
 export default router;
