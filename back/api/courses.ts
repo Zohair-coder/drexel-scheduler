@@ -69,7 +69,7 @@ function checkTimeConflict(schedule: any[]) {
         continue;
       }
 
-      if (section1.days === section2.days) {
+      if (intersection(section1.days, section2.days).length > 0) {
         if (
           !section1.start_time ||
           !section1.end_time ||
@@ -123,6 +123,10 @@ function computeSchedules(courses: any[][], n: number): any[][] {
   backtrack([], 0);
 
   return combinations;
+}
+
+function intersection(array1: any[], array2: any[]) {
+  return array1.filter((value) => array2.includes(value));
 }
 
 export default router;
