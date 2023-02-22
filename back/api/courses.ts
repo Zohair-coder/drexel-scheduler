@@ -47,15 +47,56 @@ router.post("/generateSchedules", async (req, res) => {
       }
     }
 
+    let hasTimeConflict = checkTimeConflict(schedule);
+
     response.push({
-      schedule: schedule,
-      hasTimeConflict: false, // TODO: Implement this
+      schedule,
+      hasTimeConflict,
       hasFullSections,
     });
   }
 
   res.send(response);
 });
+
+function checkTimeConflict(schedule: any[]) {
+  for (let i = 0; i < schedule.length; i++) {
+    for (let j = i + 1; j < schedule.length; j++) {
+      let section1 = schedule[i];
+      let section2 = schedule[j];
+
+      if (!section1.days || !section2.days) {
+        continue;
+      }
+
+      if (section1.days === section2.days) {
+        if (
+          !section1.start_time ||
+          !section1.end_time ||
+          !section2.start_time ||
+          !section2.end_time
+        ) {
+          continue;
+        }
+        let start1 = getDateFromTime(section1.start_time);
+        let end1 = getDateFromTime(section1.end_time);
+        let start2 = getDateFromTime(section2.start_time);
+        let end2 = getDateFromTime(section2.end_time);
+        if (start1 < end2 && start2 < end1) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+function getDateFromTime(time: string) {
+  let [hour, minute] = time.split(":");
+
+  return new Date(0, 0, 0, parseInt(hour), parseInt(minute));
+}
 
 function computeSchedules(courses: any[][], n: number): any[][] {
   const combinations: any[][] = [];
