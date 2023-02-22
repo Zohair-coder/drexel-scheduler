@@ -37,11 +37,20 @@ router.post("/generateSchedules", async (req, res) => {
   let schedules = computeSchedules(courses, num_courses);
 
   let response: any[] = [];
+
   for (let schedule of schedules) {
+    let hasFullSections = false;
+    for (let section of schedule) {
+      if (section.enroll === "FULL" || section.max_enroll === "FULL") {
+        hasFullSections = true;
+        break;
+      }
+    }
+
     response.push({
       schedule: schedule,
       hasTimeConflict: false, // TODO: Implement this
-      isFull: false, // TODO: Implement this
+      hasFullSections,
     });
   }
 
