@@ -24,7 +24,17 @@ router.post("/generateSchedules", async (req, res) => {
   let courses = [];
   for (let course of courses_input) {
     let [subject_code, course_number] = course.split(" ");
+
+    if (!subject_code || !course_number) {
+      return res.status(400).send("Invalid course " + course);
+    }
+
     let sections = await db.getSections(subject_code, course_number);
+
+    if (sections.rowCount === 0) {
+      return res.status(404).send("No sections found for " + course);
+    }
+
     courses.push(sections.rows);
   }
   console.log(courses);
