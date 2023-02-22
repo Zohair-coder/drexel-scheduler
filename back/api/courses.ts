@@ -61,11 +61,15 @@ router.post("/generateschedules", async (req, res) => {
       await add_instructors(section);
     }
 
+    let times = getAverageScheduleStartAndEndTime(schedule);
+
     response.push({
       schedule,
       hasTimeConflict,
       hasFullSections,
       avgScheduleRating: getAvereageScheduleRating(schedule),
+      avgScheduleStartTime: times ? times[0] : null,
+      avgScheduleEndTime: times ? times[1] : null,
     });
   }
 
@@ -157,6 +161,45 @@ async function add_instructors(section: any) {
   let crn = section.crn;
   let instructors = await db.getInstructors(crn);
   section.instructors = instructors;
+}
+
+function getAverageScheduleStartAndEndTime(schedule: any[]) {
+  let total_start_time = 0;
+  let total_end_time = 0;
+  let num_sections = 0;
+
+  for (let section of schedule) {
+    if (section.start_time && section.end_time) {
+      total_start_time += getDateFromTime(section.start_time).getTime();
+      total_end_time += getDateFromTime(section.end_time).getTime();
+      num_sections++;
+    }
+  }
+
+  if (num_sections === 0) {
+    return;
+  }
+
+  let avg_start_time = total_start_time / num_sections;
+  let avg_end_time = total_end_time / num_sections;
+
+  let start_date = new Date(avg_start_time);
+  let end_date = new Date(avg_end_time);
+
+  return [
+    new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: false,
+    }).format(start_date),
+    new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: false,
+    }).format(end_date),
+  ];
 }
 
 function getAvereageScheduleRating(schedule: any[]) {
