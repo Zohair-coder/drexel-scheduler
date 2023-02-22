@@ -70,6 +70,8 @@ router.post("/generateschedules", async (req, res) => {
       avgScheduleRating: getAvereageScheduleRating(schedule),
       avgScheduleStartTime: times ? times[0] : null,
       avgScheduleEndTime: times ? times[1] : null,
+      earliestClassTime: getEarliestClassTime(schedule),
+      latestClassTime: getLatestClassTime(schedule),
     });
   }
 
@@ -236,4 +238,51 @@ function getAvereageScheduleRating(schedule: any[]) {
   return avg_schedule_rating;
 }
 
+function getLatestClassTime(schedule: any[]) {
+  let latest_time = null;
+
+  for (let section of schedule) {
+    if (section.end_time) {
+      let end_time = getDateFromTime(section.end_time);
+      if (!latest_time || end_time > latest_time) {
+        latest_time = end_time;
+      }
+    }
+  }
+
+  if (!latest_time) {
+    return;
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    hour12: false,
+  }).format(latest_time);
+}
+
+function getEarliestClassTime(schedule: any[]) {
+  let earliest_time = null;
+
+  for (let section of schedule) {
+    if (section.start_time) {
+      let start_time = getDateFromTime(section.start_time);
+      if (!earliest_time || start_time < earliest_time) {
+        earliest_time = start_time;
+      }
+    }
+  }
+
+  if (!earliest_time) {
+    return;
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    hour12: false,
+  }).format(earliest_time);
+}
 export default router;
