@@ -13,12 +13,8 @@ router.post("/generateSchedules", async (req, res) => {
   let courses_input = req.body.courses;
   let num_courses = req.body.num_courses;
 
-  if (!courses_input) {
-    res.status(400).send("No courses provided");
-  }
-
-  if (courses_input.length === 0) {
-    res.status(400).send("No courses provided");
+  if (!courses_input || courses_input.length === 0) {
+    res.status(400).json({ error: "No courses provided" });
   }
 
   let courses = [];
@@ -26,13 +22,13 @@ router.post("/generateSchedules", async (req, res) => {
     let [subject_code, course_number] = course.split(" ");
 
     if (!subject_code || !course_number) {
-      return res.status(400).send("Invalid course " + course);
+      return res.status(400).json({ error: "Invalid course: " + course });
     }
 
     let sections = await db.getSections(subject_code, course_number);
 
     if (sections.rowCount === 0) {
-      return res.status(404).send("No sections found for " + course);
+      return res.status(404).json({ error: "No sections found for " + course });
     }
 
     courses.push(sections.rows);
