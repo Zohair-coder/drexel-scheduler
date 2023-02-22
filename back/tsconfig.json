@@ -1,0 +1,19 @@
+{
+  "include": ["**/*"],
+  // exclude jest tests and test utils, which are named test.whatever.ts
+  "exclude": ["**/*.test.ts", "**/test.*.ts"],
+  "compilerOptions": {
+    "outDir": "out",
+
+    // enable top-level await and import/export syntax
+    "target": "es2017",
+    "moduleResolution": "node16",
+    "module": "es2022",
+
+    // enable type checking
+    "strict": true,
+
+    // to make jest happy
+    "esModuleInterop": true
+  }
+}
