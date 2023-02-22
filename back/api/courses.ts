@@ -10,7 +10,8 @@ router.get("/", async (req, res) => {
 
 router.post("/generateSchedules", async (req, res) => {
   console.log(req.body);
-  let courses_input = req.body;
+  let courses_input = req.body.courses;
+  let num_courses = req.body.num_courses;
 
   if (!courses_input) {
     res.status(400).send("No courses provided");
@@ -27,7 +28,13 @@ router.post("/generateSchedules", async (req, res) => {
     courses.push(sections.rows);
   }
   console.log(courses);
-  let combinations = computeSectionCombinations(courses, courses.length);
+  //   TODO: fix computeSectionCombinations function.
+  // Currently, it will return 6 instead of 11 combinations for the following input:
+  // courses = [["A", "B", "C"], ["D", "E"], ["F"]]
+  // num_courses = 2
+  // Expected output: [["A", "D"], ["A", "E"], ["B", "D"], ["B", "E"], ["C", "D"], ["C", "E"], ["A", "F"], ["B", "F"], ["C", "F"], ["D", "F"], ["E", "F"]]
+  //   Actual output: [["A", "D"], ["A", "E"], ["B", "D"], ["B", "E"], ["C", "D"], ["C", "E"]]
+  let combinations = computeSectionCombinations(courses, num_courses);
   res.send(combinations);
 });
 
