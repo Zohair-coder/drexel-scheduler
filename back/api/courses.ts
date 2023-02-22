@@ -28,34 +28,33 @@ router.post("/generateSchedules", async (req, res) => {
     courses.push(sections.rows);
   }
   console.log(courses);
-  //   TODO: fix computeSectionCombinations function.
-  // Currently, it will return 6 instead of 11 combinations for the following input:
-  // courses = [["A", "B", "C"], ["D", "E"], ["F"]]
-  // num_courses = 2
-  // Expected output: [["A", "D"], ["A", "E"], ["B", "D"], ["B", "E"], ["C", "D"], ["C", "E"], ["A", "F"], ["B", "F"], ["C", "F"], ["D", "F"], ["E", "F"]]
-  //   Actual output: [["A", "D"], ["A", "E"], ["B", "D"], ["B", "E"], ["C", "D"], ["C", "E"]]
   let combinations = computeSectionCombinations(courses, num_courses);
   res.send(combinations);
 });
 
-function computeSectionCombinations(courses: any[][], n: number): any[][][] {
-  const combinations: any[][][] = [];
+function computeSectionCombinations(courses: any[][], n: number): any[][] {
+  const combinations: any[][] = [];
 
-  function backtrack(combo: any[][]): void {
+  function backtrack(combo: any[][], i: number): void {
     if (combo.length === n) {
       combinations.push(combo);
       return;
     }
 
-    const i = combo.length;
+    if (i >= courses.length) {
+      return;
+    }
+
     const course = courses[i];
 
     for (const section of course) {
-      backtrack([...combo, section]);
+      backtrack([...combo, section], i + 1);
     }
+
+    backtrack(combo, i + 1);
   }
 
-  backtrack([]);
+  backtrack([], 0);
 
   return combinations;
 }
