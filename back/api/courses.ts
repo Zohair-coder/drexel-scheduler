@@ -8,12 +8,29 @@ router.get("/", async (req, res) => {
   res.send("Hello World!");
 });
 
-router.post("/generateSchedules", async (req, res) => {
+router.post("/generateschedules", async (req, res) => {
   let courses_input: string[] = req.body.courses;
-  let num_courses = req.body.num_courses;
 
   if (!courses_input || courses_input.length === 0) {
-    res.status(400).json({ error: "No courses provided" });
+    return res.status(400).json({ error: "No courses provided" });
+  }
+
+  let num_courses;
+  if (req.body.num_courses) {
+    if (Number.isInteger(req.body.num_courses)) {
+      num_courses = parseInt(req.body.num_courses);
+    } else {
+      return res.status(400).json({ error: "Invalid number of courses" });
+    }
+  } else {
+    num_courses = courses_input.length;
+  }
+
+  if (num_courses > courses_input.length) {
+    return res.status(400).json({
+      error:
+        "Number of courses cannot be greater than number of courses provided",
+    });
   }
 
   let courses = [];
