@@ -9,7 +9,6 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/generateSchedules", async (req, res) => {
-  console.log(req.body);
   let courses_input: string[] = req.body.courses;
   let num_courses = req.body.num_courses;
 
@@ -33,21 +32,17 @@ router.post("/generateSchedules", async (req, res) => {
 
     courses.push(sections.rows);
   }
-  console.log(courses);
   let schedules = computeSchedules(courses, num_courses);
 
   let response: any[] = [];
 
   for (let schedule of schedules) {
-    let hasFullSections = false;
-    for (let section of schedule) {
-      if (section.enroll === "FULL" || section.max_enroll === "FULL") {
-        hasFullSections = true;
-        break;
-      }
-    }
-
+    let hasFullSections = checkFullSections(schedule);
     let hasTimeConflict = checkTimeConflict(schedule);
+
+    for (let section of schedule) {
+      await add_instructors(section);
+    }
 
     response.push({
       schedule,
@@ -58,6 +53,17 @@ router.post("/generateSchedules", async (req, res) => {
 
   res.send(response);
 });
+
+function checkFullSections(schedule: any[]) {
+  let hasFullSections = false;
+  for (let section of schedule) {
+    if (section.enroll === "FULL" || section.max_enroll === "FULL") {
+      hasFullSections = true;
+      break;
+    }
+  }
+  return hasFullSections;
+}
 
 function checkTimeConflict(schedule: any[]) {
   for (let i = 0; i < schedule.length; i++) {
@@ -127,6 +133,12 @@ function computeSchedules(courses: any[][], n: number): any[][] {
 
 function intersection(array1: any[], array2: any[]) {
   return array1.filter((value) => array2.includes(value));
+}
+
+async function add_instructors(section: any) {
+  let crn = section.crn;
+  let instructors = await db.getInstructors(crn);
+  section.instructors = instructors;
 }
 
 export default router;
