@@ -26,8 +26,31 @@ router.post("/generateSchedules", async (req, res) => {
     let sections = await db.getSections(subject_code, course_number);
     courses.push(sections.rows);
   }
-  //   TODO: Generate schedules
-  res.send(courses);
+  console.log(courses);
+  let combinations = computeSectionCombinations(courses, courses.length);
+  res.send(combinations);
 });
+
+function computeSectionCombinations(courses: any[][], n: number): any[][][] {
+  const combinations: any[][][] = [];
+
+  function backtrack(combo: any[][]): void {
+    if (combo.length === n) {
+      combinations.push(combo);
+      return;
+    }
+
+    const i = combo.length;
+    const course = courses[i];
+
+    for (const section of course) {
+      backtrack([...combo, section]);
+    }
+  }
+
+  backtrack([]);
+
+  return combinations;
+}
 
 export default router;
