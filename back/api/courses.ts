@@ -29,7 +29,17 @@ router.post("/generateSchedules", async (req, res) => {
   }
   console.log(courses);
   let combinations = computeSectionCombinations(courses, num_courses);
-  res.send(combinations);
+
+  let response: any[] = [];
+  for (let combination of combinations) {
+    response.push({
+      courses: combination,
+      hasTimeConflict: false, // TODO: Implement this
+      isFull: false, // TODO: Implement this
+    });
+  }
+
+  res.send(response);
 });
 
 function computeSectionCombinations(courses: any[][], n: number): any[][] {
