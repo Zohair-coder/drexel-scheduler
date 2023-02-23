@@ -24,4 +24,3 @@ This will incorporate live changes.
 
 POST: `http://localhost:3000/api/courses/generateschedules`
 Body: `{"courses": ["CS 265", "CS 260", "CS 270"], "num_courses": 2}`
-`num_courses` is optional and defaults to length of courses.
