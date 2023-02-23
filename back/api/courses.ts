@@ -64,7 +64,6 @@ router.post("/generateschedules", async (req, res) => {
     let times = getAverageScheduleStartAndEndTime(schedule);
 
     response.push({
-      schedule,
       hasTimeConflict,
       hasFullSections,
       avgScheduleRating: getAvereageScheduleRating(schedule),
@@ -72,6 +71,7 @@ router.post("/generateschedules", async (req, res) => {
       avgScheduleEndTime: times ? times[1] : null,
       earliestClassTime: getEarliestClassTime(schedule),
       latestClassTime: getLatestClassTime(schedule),
+      schedule,
     });
   }
 
@@ -134,6 +134,12 @@ function computeSchedules(courses: any[][], n: number): any[][] {
   function backtrack(combo: any[][], i: number): void {
     if (combo.length === n) {
       combinations.push(combo);
+      return;
+    }
+
+    // cap at 1000 schedules to avoid long wait times
+    // and out of memory errors
+    if (combinations.length >= 1000) {
       return;
     }
 
