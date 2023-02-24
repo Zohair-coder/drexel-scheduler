@@ -69,21 +69,25 @@ router.post("/generateschedules", async (req, res) => {
     let schedulesResponse: any[] = [];
 
     for (let schedule of schedules) {
-        let hasFullSections = checkFullSections(schedule);
-        let hasTimeConflict = checkTimeConflict(schedule);
-
         for (let course of schedule) {
             for (let section of course) {
-                await add_instructors(section);
+                await add_instructor_ids(section);
             }
         }
+    }
+
+    const instructors = await getAllInstructors(schedules);
+
+    for (let schedule of schedules) {
+        let hasFullSections = checkFullSections(schedule);
+        let hasTimeConflict = checkTimeConflict(schedule);
 
         let times = getAverageScheduleStartAndEndTime(schedule);
 
         schedulesResponse.push({
             hasTimeConflict,
             hasFullSections,
-            avgScheduleRating: getAvereageScheduleRating(schedule),
+            avgScheduleRating: getAvereageScheduleRating(schedule, instructors),
             avgScheduleStartTime: times ? times[0] : null,
             avgScheduleEndTime: times ? times[1] : null,
             earliestClassTime: getEarliestClassTime(schedule),
@@ -95,6 +99,7 @@ router.post("/generateschedules", async (req, res) => {
     res.send({
         totalSchedules: schedulesResponse.length,
         schedules: schedulesResponse,
+        instructors,
     });
 });
 
@@ -202,10 +207,17 @@ function intersection(array1: any[], array2: any[]) {
     return array1.filter((value) => array2.includes(value));
 }
 
-async function add_instructors(section: any) {
+async function add_instructor_ids(section: any) {
     let crn = section.crn;
     let instructors = await db.getInstructors(crn);
-    section.instructors = instructors;
+
+    let instructor_ids = [];
+
+    for (let instructor of instructors) {
+        instructor_ids.push(instructor.id);
+    }
+
+    section.instructors = instructor_ids;
 }
 
 function getAverageScheduleStartAndEndTime(schedule: any[]) {
@@ -251,7 +263,7 @@ function getAverageScheduleStartAndEndTime(schedule: any[]) {
     ];
 }
 
-function getAvereageScheduleRating(schedule: any[]) {
+function getAvereageScheduleRating(schedule: any[], instructors: any) {
     let total_avg_rating = 0;
     let total_difficulty = 0;
     let total_ratings = 0;
@@ -259,7 +271,8 @@ function getAvereageScheduleRating(schedule: any[]) {
 
     for (let course of schedule) {
         for (let section of course) {
-            for (let instructor of section.instructors) {
+            for (let instructor_id of section.instructors) {
+                let instructor = instructors[instructor_id];
                 if (
                     instructor.avg_rating &&
                     instructor.avg_difficulty &&
@@ -364,5 +377,27 @@ function computeCourseUnits(sections_by_instruction_types: any) {
     backtrack([], 0);
 
     return combinations;
+}
+
+async function getAllInstructors(schedules: any[]) {
+    let instructor_ids: Set<number> = new Set();
+
+    for (let schedule of schedules) {
+        for (let course of schedule) {
+            for (let section of course) {
+                for (let instructor of section.instructors) {
+                    instructor_ids.add(instructor);
+                }
+            }
+        }
+    }
+
+    let instructors: any = {};
+
+    for (let instructor_id of instructor_ids) {
+        instructors[instructor_id] = await db.getInstructor(instructor_id);
+    }
+
+    return instructors;
 }
 export default router;
