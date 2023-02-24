@@ -86,7 +86,7 @@ router.post("/generateschedules", async (req, res) => {
         response.push({
             hasTimeConflict,
             hasFullSections,
-            // avgScheduleRating: getAvereageScheduleRating(schedule),
+            avgScheduleRating: getAvereageScheduleRating(schedule),
             avgScheduleStartTime: times ? times[0] : null,
             avgScheduleEndTime: times ? times[1] : null,
             // earliestClassTime: getEarliestClassTime(schedule),
@@ -257,17 +257,19 @@ function getAvereageScheduleRating(schedule: any[]) {
     let total_ratings = 0;
     let num_ratings = 0;
 
-    for (let section of schedule) {
-        for (let instructor of section.instructors) {
-            if (
-                instructor.avg_rating &&
-                instructor.avg_difficulty &&
-                instructor.num_ratings
-            ) {
-                total_avg_rating += parseFloat(instructor.avg_rating);
-                total_difficulty += parseFloat(instructor.avg_difficulty);
-                total_ratings += parseInt(instructor.num_ratings);
-                num_ratings++;
+    for (let course of schedule) {
+        for (let section of course) {
+            for (let instructor of section.instructors) {
+                if (
+                    instructor.avg_rating &&
+                    instructor.avg_difficulty &&
+                    instructor.num_ratings
+                ) {
+                    total_avg_rating += parseFloat(instructor.avg_rating);
+                    total_difficulty += parseFloat(instructor.avg_difficulty);
+                    total_ratings += parseInt(instructor.num_ratings);
+                    num_ratings++;
+                }
             }
         }
     }
