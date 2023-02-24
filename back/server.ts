@@ -11,9 +11,9 @@ app.get("/api/health", (req, res) => {
     res.send("OK");
 });
 
-let port = 3000;
+let port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 let host = "localhost";
 let protocol = "http";
-app.listen(port, host, () => {
+app.listen(port, () => {
     console.log(`${protocol}://${host}:${port}`);
 });
