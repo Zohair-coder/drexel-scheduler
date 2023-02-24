@@ -32,6 +32,8 @@ router.post("/generateschedules", async (req, res) => {
         });
     }
 
+    courses_input = [...new Set(courses_input)];
+
     let courses = [];
     for (let course of courses_input) {
         let [subject_code, course_number] = course.split(" ");
