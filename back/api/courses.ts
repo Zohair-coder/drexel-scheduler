@@ -66,7 +66,7 @@ router.post("/generateschedules", async (req, res) => {
     }
     let schedules = computeSchedules(courses, num_courses);
 
-    let response: any[] = [];
+    let schedulesResponse: any[] = [];
 
     for (let schedule of schedules) {
         let hasFullSections = checkFullSections(schedule);
@@ -80,7 +80,7 @@ router.post("/generateschedules", async (req, res) => {
 
         let times = getAverageScheduleStartAndEndTime(schedule);
 
-        response.push({
+        schedulesResponse.push({
             hasTimeConflict,
             hasFullSections,
             avgScheduleRating: getAvereageScheduleRating(schedule),
@@ -92,7 +92,10 @@ router.post("/generateschedules", async (req, res) => {
         });
     }
 
-    res.send(response);
+    res.send({
+        totalSchedules: schedulesResponse.length,
+        schedules: schedulesResponse,
+    });
 });
 
 function checkFullSections(schedule: any[]) {
@@ -173,9 +176,9 @@ function computeSchedules(courses: any[][], n: number): any[][] {
 
         // cap at 1000 schedules to avoid long wait times
         // and out of memory errors
-        if (combinations.length >= 1000) {
-            return;
-        }
+        // if (combinations.length >= 1000) {
+        //     return;
+        // }
 
         if (i >= courses.length) {
             return;
