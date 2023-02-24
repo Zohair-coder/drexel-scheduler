@@ -7,7 +7,7 @@ app.use(express.json());
 
 app.use("/api/courses", coursesRouter);
 
-app.get("/health", (req, res) => {
+app.get("/api/health", (req, res) => {
     res.send("OK");
 });
 
