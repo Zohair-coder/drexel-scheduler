@@ -72,23 +72,23 @@ router.post("/generateschedules", async (req, res) => {
         let hasFullSections = checkFullSections(schedule);
         let hasTimeConflict = checkTimeConflict(schedule);
 
-        // TODO: fix all these properties that are being sent as a response
-        // to work with the new structure of schedules
-
         for (let course of schedule) {
             for (let section of course) {
                 await add_instructors(section);
             }
         }
 
-        // let times = getAverageScheduleStartAndEndTime(schedule);
+        // TODO: fix all these properties that are being sent as a response
+        // to work with the new structure of schedules
+
+        let times = getAverageScheduleStartAndEndTime(schedule);
 
         response.push({
             hasTimeConflict,
             hasFullSections,
             // avgScheduleRating: getAvereageScheduleRating(schedule),
-            // avgScheduleStartTime: times ? times[0] : null,
-            // avgScheduleEndTime: times ? times[1] : null,
+            avgScheduleStartTime: times ? times[0] : null,
+            avgScheduleEndTime: times ? times[1] : null,
             // earliestClassTime: getEarliestClassTime(schedule),
             // latestClassTime: getLatestClassTime(schedule),
             schedule,
@@ -213,11 +213,15 @@ function getAverageScheduleStartAndEndTime(schedule: any[]) {
     let total_end_time = 0;
     let num_sections = 0;
 
-    for (let section of schedule) {
-        if (section.start_time && section.end_time) {
-            total_start_time += getDateFromTime(section.start_time).getTime();
-            total_end_time += getDateFromTime(section.end_time).getTime();
-            num_sections++;
+    for (let course of schedule) {
+        for (let section of course) {
+            if (section.start_time && section.end_time) {
+                total_start_time += getDateFromTime(
+                    section.start_time
+                ).getTime();
+                total_end_time += getDateFromTime(section.end_time).getTime();
+                num_sections++;
+            }
         }
     }
 
