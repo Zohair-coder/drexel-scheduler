@@ -70,10 +70,10 @@ router.post("/generateschedules", async (req, res) => {
 
     for (let schedule of schedules) {
         let hasFullSections = checkFullSections(schedule);
+        let hasTimeConflict = checkTimeConflict(schedule);
+
         // TODO: fix all these properties that are being sent as a response
         // to work with the new structure of schedules
-
-        // let hasTimeConflict = checkTimeConflict(schedule);
 
         // for (let section of schedule) {
         //     await add_instructors(section);
@@ -82,7 +82,7 @@ router.post("/generateschedules", async (req, res) => {
         // let times = getAverageScheduleStartAndEndTime(schedule);
 
         response.push({
-            // hasTimeConflict,
+            hasTimeConflict,
             hasFullSections,
             // avgScheduleRating: getAvereageScheduleRating(schedule),
             // avgScheduleStartTime: times ? times[0] : null,
@@ -109,34 +109,49 @@ function checkFullSections(schedule: any[]) {
     return hasFullSections;
 }
 
-function checkTimeConflict(schedule: any[]) {
+function checkTimeConflict(schedule: any[][]) {
     for (let i = 0; i < schedule.length; i++) {
-        for (let j = i + 1; j < schedule.length; j++) {
+        for (let j = i; j < schedule.length; j++) {
             let course1 = schedule[i];
             let course2 = schedule[j];
 
-            if (!course1.days || !course2.days) {
-                continue;
-            }
+            for (let section1 of course1) {
+                for (let section2 of course2) {
+                    if (section1 === section2) {
+                        continue;
+                    }
 
-            if (intersection(course1.days, course2.days).length > 0) {
-                if (
-                    !course1.start_time ||
-                    !course1.end_time ||
-                    !course2.start_time ||
-                    !course2.end_time
-                ) {
-                    continue;
-                }
-                let start1 = getDateFromTime(course1.start_time);
-                let end1 = getDateFromTime(course1.end_time);
-                let start2 = getDateFromTime(course2.start_time);
-                let end2 = getDateFromTime(course2.end_time);
-                if (start1 < end2 && start2 < end1) {
-                    return true;
+                    if (!section1.days || !section2.days) {
+                        continue;
+                    }
+
+                    if (intersection(section1.days, section2.days).length > 0) {
+                        if (
+                            section1.start_time &&
+                            section1.end_time &&
+                            section2.start_time &&
+                            section2.end_time
+                        ) {
+                            if (checkTimeConflictHelper(section1, section2)) {
+                                return true;
+                            }
+                        }
+                    }
                 }
             }
         }
+    }
+    return false;
+}
+
+function checkTimeConflictHelper(section1: any, section2: any) {
+    let start_time1 = getDateFromTime(section1.start_time);
+    let end_time1 = getDateFromTime(section1.end_time);
+    let start_time2 = getDateFromTime(section2.start_time);
+    let end_time2 = getDateFromTime(section2.end_time);
+
+    if (start_time1 < end_time2 && start_time2 < end_time1) {
+        return true;
     }
 
     return false;
