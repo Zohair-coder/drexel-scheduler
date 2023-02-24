@@ -75,9 +75,11 @@ router.post("/generateschedules", async (req, res) => {
         // TODO: fix all these properties that are being sent as a response
         // to work with the new structure of schedules
 
-        // for (let section of schedule) {
-        //     await add_instructors(section);
-        // }
+        for (let course of schedule) {
+            for (let section of course) {
+                await add_instructors(section);
+            }
+        }
 
         // let times = getAverageScheduleStartAndEndTime(schedule);
 
