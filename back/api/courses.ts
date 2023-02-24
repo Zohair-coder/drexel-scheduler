@@ -89,7 +89,7 @@ router.post("/generateschedules", async (req, res) => {
             avgScheduleRating: getAvereageScheduleRating(schedule),
             avgScheduleStartTime: times ? times[0] : null,
             avgScheduleEndTime: times ? times[1] : null,
-            // earliestClassTime: getEarliestClassTime(schedule),
+            earliestClassTime: getEarliestClassTime(schedule),
             // latestClassTime: getLatestClassTime(schedule),
             schedule,
         });
@@ -314,11 +314,13 @@ function getLatestClassTime(schedule: any[]) {
 function getEarliestClassTime(schedule: any[]) {
     let earliest_time = null;
 
-    for (let section of schedule) {
-        if (section.start_time) {
-            let start_time = getDateFromTime(section.start_time);
-            if (!earliest_time || start_time < earliest_time) {
-                earliest_time = start_time;
+    for (let course of schedule) {
+        for (let section of course) {
+            if (section.start_time) {
+                let start_time = getDateFromTime(section.start_time);
+                if (!earliest_time || start_time < earliest_time) {
+                    earliest_time = start_time;
+                }
             }
         }
     }
