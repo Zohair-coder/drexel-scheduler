@@ -78,9 +78,6 @@ router.post("/generateschedules", async (req, res) => {
             }
         }
 
-        // TODO: fix all these properties that are being sent as a response
-        // to work with the new structure of schedules
-
         let times = getAverageScheduleStartAndEndTime(schedule);
 
         response.push({
@@ -90,7 +87,7 @@ router.post("/generateschedules", async (req, res) => {
             avgScheduleStartTime: times ? times[0] : null,
             avgScheduleEndTime: times ? times[1] : null,
             earliestClassTime: getEarliestClassTime(schedule),
-            // latestClassTime: getLatestClassTime(schedule),
+            latestClassTime: getLatestClassTime(schedule),
             schedule,
         });
     }
@@ -290,11 +287,13 @@ function getAvereageScheduleRating(schedule: any[]) {
 function getLatestClassTime(schedule: any[]) {
     let latest_time = null;
 
-    for (let section of schedule) {
-        if (section.end_time) {
-            let end_time = getDateFromTime(section.end_time);
-            if (!latest_time || end_time > latest_time) {
-                latest_time = end_time;
+    for (let course of schedule) {
+        for (let section of course) {
+            if (section.end_time) {
+                let end_time = getDateFromTime(section.end_time);
+                if (!latest_time || end_time > latest_time) {
+                    latest_time = end_time;
+                }
             }
         }
     }
