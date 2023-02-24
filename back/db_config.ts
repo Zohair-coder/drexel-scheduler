@@ -11,6 +11,7 @@ let config = {
     database: process.env.DB_NAME || "schedulerdb",
     password: process.env.DB_PASSWORD || "",
     port,
+    ssl: process.env.PROD ? true : false,
 };
 
 export default config;
