@@ -11,12 +11,11 @@ cd back
 npm install
 npm run build
 npm run start
-cd ..
 ```
 
 This should start the backend server. Then run:
 
-````bash
+```bash
 cd front
 npm install
 npm run start
@@ -30,4 +29,7 @@ This should start the frontend server.
 
 POST: `http://localhost:3000/api/courses/generateschedules`
 Example Body: `{"courses": ["CS 265", "CS 260", "CS 270"], "num_courses": 2}`
-````
+
+```
+
+```
