@@ -1,6 +1,5 @@
 import express from "express";
 import coursesRouter from "./api/courses.js";
-import v8 from "v8";
 
 let app = express();
 
@@ -17,5 +16,4 @@ let host = "localhost";
 let protocol = "http";
 app.listen(port, () => {
     console.log(`${protocol}://${host}:${port}`);
-    console.log(v8.getHeapStatistics());
 });
