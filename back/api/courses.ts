@@ -194,7 +194,9 @@ function computeSchedules(courses: any[][], n: number): any[][] {
         const course = courses[i];
 
         for (const section of course) {
-            backtrack([...combo, section], i + 1);
+            combo.push(section);
+            backtrack(combo, i + 1);
+            combo.pop();
         }
 
         backtrack(combo, i + 1);
