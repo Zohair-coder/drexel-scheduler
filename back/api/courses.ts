@@ -66,7 +66,10 @@ router.post("/generateschedules", async (req, res) => {
 
         courses.push(course_units);
     }
-    let schedules = computeSchedules(courses, num_courses);
+
+    let [mappedCourses, sectionsMapping] = coursesWithMappedSections(courses);
+    let mappedSchedules = computeSchedules(mappedCourses, num_courses);
+    let schedules = getSchedulesFromMapping(mappedSchedules, sectionsMapping);
 
     let schedulesResponse: any[] = [];
 
@@ -405,5 +408,33 @@ async function getAllInstructors(schedules: any[]) {
     }
 
     return instructors;
+}
+
+function coursesWithMappedSections(courses: any) {
+    let coursesWithMappedSections: any = [];
+    let idToCourseMapping: any = {};
+    let count = 0;
+    for (let course of courses) {
+        let section_ids = [];
+        for (let section of course) {
+            count++;
+            section_ids.push(count);
+            idToCourseMapping[count] = section;
+        }
+        coursesWithMappedSections.push(section_ids);
+    }
+    return [coursesWithMappedSections, idToCourseMapping];
+}
+
+function getSchedulesFromMapping(mappedSchedules: any[][], mapping: any) {
+    let schedules: any[] = [];
+    for (let mappedSchedule of mappedSchedules) {
+        let schedule: any[] = [];
+        for (let section_id of mappedSchedule) {
+            schedule.push(mapping[section_id]);
+        }
+        schedules.push(schedule);
+    }
+    return schedules;
 }
 export default router;
