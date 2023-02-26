@@ -67,6 +67,8 @@ router.post("/generateschedules", async (req, res) => {
         courses.push(course_units);
     }
 
+    // mapping all sections to a unique id
+    // this is done to save memory
     let [mappedCourses, sectionsMapping] = coursesWithMappedSections(courses);
     let mappedSchedules = computeSchedules(mappedCourses, num_courses);
     let schedules = getSchedulesFromMapping(mappedSchedules, sectionsMapping);
