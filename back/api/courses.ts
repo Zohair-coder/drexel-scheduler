@@ -67,14 +67,15 @@ router.post("/generateschedules", async (req, res) => {
         courses.push(course_units);
     }
 
-    // mapping all sections to a unique id
-    // this is done to save memory
-    let [mappedCourses, sectionsMapping] = coursesWithMappedSections(courses);
-    let mappedSchedules = computeSchedules(mappedCourses, num_courses);
-    let schedules = getSchedulesFromMapping(mappedSchedules, sectionsMapping);
+    console.log("Computing schedules...");
+    let schedules = computeSchedules(courses, num_courses);
+    console.log(
+        "Done computing schedules - " + schedules.length + " schedules"
+    );
 
     let schedulesResponse: any[] = [];
 
+    console.log("Adding instructor ids...");
     for (let schedule of schedules) {
         for (let course of schedule) {
             for (let section of course) {
@@ -82,26 +83,35 @@ router.post("/generateschedules", async (req, res) => {
             }
         }
     }
+    console.log("Done adding instructor ids");
 
+    console.log("Getting instructors...");
     const instructors = await getAllInstructors(schedules);
+    console.log("Done getting instructors");
 
+    console.log("Adding other info...");
     for (let schedule of schedules) {
         let hasFullSections = checkFullSections(schedule);
-        let hasTimeConflict = checkTimeConflict(schedule);
 
-        let times = getAverageScheduleStartAndEndTime(schedule);
+        let avgScheduleRating = getAvereageScheduleRating(
+            schedule,
+            instructors
+        );
+
+        let earliestClassTime = getEarliestClassTime(schedule);
+
+        let latestClassTime = getLatestClassTime(schedule);
 
         schedulesResponse.push({
-            hasTimeConflict,
             hasFullSections,
-            avgScheduleRating: getAvereageScheduleRating(schedule, instructors),
-            avgScheduleStartTime: times ? times[0] : null,
-            avgScheduleEndTime: times ? times[1] : null,
-            earliestClassTime: getEarliestClassTime(schedule),
-            latestClassTime: getLatestClassTime(schedule),
+            avgScheduleRating,
+            earliestClassTime,
+            latestClassTime,
             schedule,
         });
     }
+
+    console.log("Done adding other info");
 
     res.send({
         totalSchedules: schedulesResponse.length,
@@ -182,7 +192,10 @@ function computeSchedules(courses: any[][], n: number): any[][] {
 
     function backtrack(combo: any[][], i: number): void {
         if (combo.length === n) {
-            combinations.push(combo.slice());
+            if (!checkTimeConflict(combo)) {
+                console.log(combo);
+                combinations.push(combo.slice());
+            }
             return;
         }
 
@@ -366,7 +379,9 @@ function computeCourseUnits(sections_by_instruction_types: any) {
 
     function backtrack(combo: any, i: number): void {
         if (combo.length === n) {
-            combinations.push(combo.slice());
+            if (!checkTimeConflict([combo])) {
+                combinations.push(combo.slice());
+            }
             return;
         }
 
