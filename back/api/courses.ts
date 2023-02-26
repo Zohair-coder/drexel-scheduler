@@ -177,7 +177,7 @@ function computeSchedules(courses: any[][], n: number): any[][] {
 
     function backtrack(combo: any[][], i: number): void {
         if (combo.length === n) {
-            combinations.push(combo);
+            combinations.push(combo.slice());
             return;
         }
 
@@ -194,7 +194,9 @@ function computeSchedules(courses: any[][], n: number): any[][] {
         const course = courses[i];
 
         for (const section of course) {
-            backtrack([...combo, section], i + 1);
+            combo.push(section);
+            backtrack(combo, i + 1);
+            combo.pop();
         }
 
         backtrack(combo, i + 1);
@@ -359,7 +361,7 @@ function computeCourseUnits(sections_by_instruction_types: any) {
 
     function backtrack(combo: any, i: number): void {
         if (combo.length === n) {
-            combinations.push(combo);
+            combinations.push(combo.slice());
             return;
         }
 
@@ -370,7 +372,9 @@ function computeCourseUnits(sections_by_instruction_types: any) {
         const section_types = sections_by_instruction_types[i];
 
         for (const section of section_types) {
-            backtrack([...combo, section], i + 1);
+            combo.push(section);
+            backtrack(combo, i + 1);
+            combo.pop();
         }
 
         backtrack(combo, i + 1);
