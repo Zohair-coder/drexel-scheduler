@@ -372,7 +372,9 @@ function computeCourseUnits(sections_by_instruction_types: any) {
         const section_types = sections_by_instruction_types[i];
 
         for (const section of section_types) {
-            backtrack([...combo, section], i + 1);
+            combo.push(section);
+            backtrack(combo, i + 1);
+            combo.pop();
         }
 
         backtrack(combo, i + 1);
