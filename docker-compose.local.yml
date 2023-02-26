@@ -1,0 +1,73 @@
+version: '3.8'
+
+x-db-variables: &db-variables
+  POSTGRES_DB: postgres
+  POSTGRES_HOST_AUTH_METHOD: trust
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+
+services:
+  psgsql_db:
+    image: postgres
+    restart: always
+    volumes:
+      - ./sql/postgres-data:/var/lib/postgresql/data
+      - "./sql/setup/init_tables.sql:/docker-entrypoint-initdb.d/setup.sql"
+    ports:
+      - "5432:5432"
+    user: postgres
+    environment:
+      <<: *db-variables
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      interval: 5s
+      timeout: 60s
+      retries: 5
+      start_period: 5s
+
+  nginx:
+    depends_on:
+      - api
+      - client
+    restart: always
+    build: 
+      dockerfile: Dockerfile
+      context: ./etc/nginx
+    ports:
+      - "3050:80"
+
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: "./back"
+    depends_on:
+      psgsql_db:
+        condition:
+          service_healthy
+    volumes:
+      - /app/node_modules
+    links:
+      - psgsql_db
+    environment:
+      <<: *db-variables
+      MYSQL_HOST_IP: psgsql_db
+
+  client:
+    stdin_open: true
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    build:
+      dockerfile: Dockerfile
+      context: ./front
+    volumes:
+      - /app/node_modules
+
+  adminer:
+      image: adminer:latest
+      restart: unless-stopped
+      ports:
+        - 8000:8080
+      depends_on:
+        - psgsql_db
+      environment:
+        ADMINER_DEFAULT_SERVER: psgsql_db
