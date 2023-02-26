@@ -1,0 +1,8 @@
+{
+  "scripts": {
+      "build": "(cd back && npm run build) && (cd front && npm run build)",
+      "postinstall": "(cd back && npm install); (cd front && npm install);"
+  },
+  "type": "module",
+  "homepage": "."
+}
